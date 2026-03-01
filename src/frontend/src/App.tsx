@@ -60,6 +60,20 @@ const staggerContainer = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
 
+// ─── YouTube SVG icon ────────────────────────────────────────────────────────
+function YouTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
 // ─── Navigation ─────────────────────────────────────────────────────────────
 function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -73,6 +87,8 @@ function Navigation() {
     { label: "Reviews", id: "reviews" },
     { label: "Contact", id: "contact" },
   ];
+
+  const youtubeUrl = "https://youtube.com/@kareems_physiotherapy";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-xs">
@@ -103,6 +119,16 @@ function Navigation() {
                 {link.label}
               </button>
             ))}
+            {/* YouTube tab */}
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-[#FF0000] hover:text-[#cc0000] transition-colors rounded-md hover:bg-red-50"
+            >
+              <YouTubeIcon className="w-4 h-4" />
+              YouTube
+            </a>
             <Button
               onClick={() => scrollTo("appointment")}
               className="ml-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
@@ -151,6 +177,17 @@ function Navigation() {
                   {link.label}
                 </button>
               ))}
+              {/* YouTube tab (mobile) */}
+              <a
+                href={youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#FF0000] hover:text-[#cc0000] hover:bg-red-50 rounded-md transition-colors"
+              >
+                <YouTubeIcon className="w-4 h-4" />
+                YouTube
+              </a>
               <Button
                 onClick={() => {
                   scrollTo("appointment");
@@ -200,7 +237,7 @@ function HeroSection() {
           >
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Now Accepting New Patients · Kalewadi
+              Now Accepting New Patients · PCMC, Pune
             </span>
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
               ⭐ 5.0 · 144 Google Reviews
@@ -219,7 +256,7 @@ function HeroSection() {
             variants={fadeUp}
             className="text-xl sm:text-2xl text-white/90 font-medium max-w-2xl leading-snug"
           >
-            Your trusted clinic for expert musculoskeletal care in Kalewadi.
+            Your trusted clinic for expert musculoskeletal care in PCMC, Pune.
           </motion.p>
 
           <motion.p
@@ -706,7 +743,7 @@ const physiotherapyTypes = [
   },
   {
     title: "Dry Needling",
-    image: "/assets/generated/treatment-manual-therapy.dim_800x500.jpg",
+    image: "/assets/generated/dry-needling-treatment.dim_800x600.jpg",
     description:
       "Precise insertion of thin needles into myofascial trigger points to release muscle tightness, reduce referred pain, and restore normal movement patterns.",
   },
@@ -1406,12 +1443,12 @@ function ContactSection() {
                           8:00 AM – 1:00 PM &amp; 4:00 PM – 6:00 PM
                         </span>
                       </div>
-                      <div className="flex items-center justify-between bg-rose-50 rounded-lg px-4 py-2.5">
+                      <div className="flex items-center justify-between bg-amber-50 rounded-lg px-4 py-2.5">
                         <span className="text-sm font-medium text-foreground">
                           Sunday
                         </span>
-                        <span className="text-sm text-rose-700 font-medium">
-                          Closed
+                        <span className="text-sm text-amber-700 font-medium">
+                          Prior Appointment Only
                         </span>
                       </div>
                     </div>
@@ -1505,10 +1542,46 @@ function ContactSection() {
 }
 
 // ─── Appointment Section ─────────────────────────────────────────────────────
+// Generate 30-min time slots for clinic hours: 10:00–13:00 and 18:00–21:00
+function generateTimeSlots(): string[] {
+  const slots: string[] = [];
+  const ranges = [
+    { start: 10, end: 13 },
+    { start: 18, end: 21 },
+  ];
+  for (const range of ranges) {
+    for (let h = range.start; h < range.end; h++) {
+      const hStr = h.toString().padStart(2, "0");
+      slots.push(`${hStr}:00`);
+      slots.push(`${hStr}:30`);
+    }
+  }
+  return slots;
+}
+
+const TIME_SLOTS = generateTimeSlots();
+
+function formatTimeSlot(slot: string): string {
+  const [hStr, mStr] = slot.split(":");
+  const h = Number.parseInt(hStr, 10);
+  const m = mStr;
+  const period = h < 12 ? "AM" : "PM";
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${m} ${period}`;
+}
+
 function AppointmentSection() {
   const { actor } = useActor();
   const [success, setSuccess] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+
+  const isSunday = (dateStr: string) => {
+    if (!dateStr) return false;
+    const d = new Date(`${dateStr}T00:00:00`);
+    return d.getDay() === 0;
+  };
 
   const sendToWhatsApp = (data: {
     name: string;
@@ -1516,8 +1589,12 @@ function AppointmentSection() {
     email: string;
     preferredDatetime: string;
     reason: string;
+    isSundayRequest?: boolean;
   }) => {
-    const formatted = `*New Appointment Request*\n\n*Name:* ${data.name}\n*Phone:* ${data.phone}\n*Email:* ${data.email}\n*Preferred Date & Time:* ${data.preferredDatetime}\n*Reason for Visit:* ${data.reason}`;
+    const sundayNote = data.isSundayRequest
+      ? "\n\n⚠️ *Note: This is a Sunday appointment request. Patient is requesting a prior call to confirm availability.*"
+      : "";
+    const formatted = `*New Appointment Request*\n\n*Name:* ${data.name}\n*Phone:* ${data.phone}\n*Email:* ${data.email}\n*Preferred Date & Time:* ${data.preferredDatetime}\n*Reason for Visit:* ${data.reason}${sundayNote}`;
     const waUrl = `https://wa.me/919922866669?text=${encodeURIComponent(formatted)}`;
     window.open(waUrl, "_blank");
   };
@@ -1529,19 +1606,29 @@ function AppointmentSection() {
       email: string;
       preferredDatetime: string;
       reason: string;
+      isSundayRequest?: boolean;
     }) => {
-      if (!actor) throw new Error("Not connected");
-      return actor.submitAppointmentRequest(
-        data.name,
-        data.phone,
-        data.email,
-        data.preferredDatetime,
-        data.reason,
-      );
+      // Try to save to backend, but don't fail the whole submission if unavailable
+      try {
+        if (actor) {
+          await actor.submitAppointmentRequest(
+            data.name,
+            data.phone,
+            data.email,
+            data.preferredDatetime,
+            data.reason,
+          );
+        }
+      } catch {
+        // Backend save failed — continue anyway, WhatsApp will deliver the request
+      }
+      return data;
     },
     onSuccess: (_result, variables) => {
       setSuccess(true);
       formRef.current?.reset();
+      setSelectedDate("");
+      setSelectedTime("");
       sendToWhatsApp(variables);
     },
   });
@@ -1549,12 +1636,17 @@ function AppointmentSection() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const preferredDatetime =
+      selectedDate && selectedTime
+        ? `${selectedDate} at ${formatTimeSlot(selectedTime)}`
+        : (fd.get("preferredDatetime") as string);
     mutation.mutate({
       name: fd.get("name") as string,
       phone: fd.get("phone") as string,
       email: fd.get("email") as string,
-      preferredDatetime: fd.get("preferredDatetime") as string,
+      preferredDatetime,
       reason: fd.get("reason") as string,
+      isSundayRequest: isSunday(selectedDate),
     });
   };
 
@@ -1682,21 +1774,111 @@ function AppointmentSection() {
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <Label
-                          htmlFor="preferredDatetime"
-                          className="font-semibold text-sm text-foreground"
-                        >
+                        <Label className="font-semibold text-sm text-foreground">
                           Preferred Date &amp; Time{" "}
                           <span className="text-destructive">*</span>
                         </Label>
-                        <Input
-                          id="preferredDatetime"
-                          name="preferredDatetime"
-                          type="datetime-local"
-                          required
-                          disabled={mutation.isPending}
-                          className="border-input focus:border-primary"
-                        />
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex flex-col gap-1">
+                            <Input
+                              id="preferredDate"
+                              name="preferredDate"
+                              type="date"
+                              required
+                              value={selectedDate}
+                              onChange={(e) => setSelectedDate(e.target.value)}
+                              disabled={mutation.isPending}
+                              className="border-input focus:border-primary"
+                              min={new Date().toISOString().split("T")[0]}
+                            />
+                          </div>
+                          <select
+                            id="preferredTime"
+                            name="preferredTime"
+                            required
+                            value={selectedTime}
+                            onChange={(e) => setSelectedTime(e.target.value)}
+                            disabled={mutation.isPending}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <option value="">Select time</option>
+                            <optgroup label="Morning (10:00 AM – 1:00 PM)">
+                              {TIME_SLOTS.filter(
+                                (s) => Number.parseInt(s) < 13,
+                              ).map((slot) => (
+                                <option key={slot} value={slot}>
+                                  {formatTimeSlot(slot)}
+                                </option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="Evening (6:00 PM – 9:00 PM)">
+                              {TIME_SLOTS.filter(
+                                (s) => Number.parseInt(s) >= 18,
+                              ).map((slot) => (
+                                <option key={slot} value={slot}>
+                                  {formatTimeSlot(slot)}
+                                </option>
+                              ))}
+                            </optgroup>
+                          </select>
+                        </div>
+
+                        {/* Sunday special notice */}
+                        <AnimatePresence>
+                          {isSunday(selectedDate) && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                              transition={{ duration: 0.25 }}
+                              className="rounded-xl border border-amber-300 bg-amber-50 p-4 flex flex-col gap-3"
+                              role="alert"
+                            >
+                              <div className="flex items-start gap-3">
+                                <span className="text-amber-500 text-xl leading-none mt-0.5">
+                                  📅
+                                </span>
+                                <div className="flex flex-col gap-1">
+                                  <p className="text-amber-900 font-bold text-sm leading-snug">
+                                    Sunday: Prior Call Appointment Only
+                                  </p>
+                                  <p className="text-amber-700 text-sm leading-relaxed">
+                                    Sunday appointments are by prior call only.
+                                    Please call or WhatsApp Dr. Kareem to
+                                    confirm your slot before submitting this
+                                    form.
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                                <a
+                                  href="tel:+919922866669"
+                                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold transition-colors shadow-sm"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                  Call Now: 9922866669
+                                </a>
+                                <a
+                                  href="https://wa.me/919922866669?text=Hello%20Dr.%20Kareem%2C%20I%20would%20like%20to%20schedule%20an%20appointment%20on%20Sunday.%20Please%20let%20me%20know%20the%20available%20timings.%20Thank%20you."
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#25D366] hover:bg-[#20b858] text-white text-sm font-bold transition-colors shadow-sm"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-4 h-4 flex-shrink-0"
+                                    aria-hidden="true"
+                                  >
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                                  </svg>
+                                  WhatsApp for Sunday Slot
+                                </a>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
 
                       <div className="flex flex-col gap-2">
@@ -1781,11 +1963,11 @@ function Footer() {
               <img
                 src="/assets/uploads/1762682118827-1--2.jpg"
                 alt="Kareem's Physiotherapy Clinic"
-                className="h-14 w-auto object-contain brightness-0 invert"
+                className="h-14 w-auto object-contain"
               />
             </div>
             <p className="text-white/60 text-sm leading-relaxed">
-              Expert musculoskeletal care in Kalewadi. Restoring movement,
+              Expert musculoskeletal care in PCMC, Pune. Restoring movement,
               enhancing lives.
             </p>
           </div>
@@ -1810,6 +1992,15 @@ function Footer() {
                 {link.label}
               </button>
             ))}
+            <a
+              href="https://youtube.com/@kareems_physiotherapy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[#FF0000]/80 hover:text-[#FF0000] text-sm transition-colors"
+            >
+              <YouTubeIcon className="w-3.5 h-3.5" />
+              YouTube Channel
+            </a>
           </div>
 
           {/* Contact */}
