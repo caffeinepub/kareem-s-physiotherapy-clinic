@@ -219,7 +219,7 @@ function HeroSection() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage:
-            "url('/assets/generated/hero-physiotherapy-enhanced.dim_1920x900.jpg')",
+            "url('/assets/generated/hero-physiotherapy-colorful.dim_1920x900.jpg')",
         }}
       />
       {/* Overlay */}
@@ -1099,9 +1099,6 @@ function WhyChooseUsSection() {
         >
           {/* Header */}
           <motion.div variants={fadeUp} className="text-center max-w-2xl">
-            <span className="text-white/50 text-xs font-semibold tracking-[0.2em] uppercase">
-              The Kareem Difference
-            </span>
             <h2 className="font-display text-4xl lg:text-5xl font-bold text-white mt-3 leading-tight">
               Why Choose Us?
             </h2>
@@ -1271,7 +1268,7 @@ function ReviewsSection() {
               Showing 3 of 144 reviews
             </p>
             <a
-              href="https://www.google.com/maps/place/Kareem's+Physiotherapy+Clinic+(Relieve+Pain,+Restore+Life)/@18.6153875,73.7867344,17z"
+              href="https://www.google.com/search?q=kareem%27s+physiotherapy+clinic%2C+relieve+pain+and+recover+faster&oq=k&gs_lcrp=EgZjaHJvbWUqCAgBEEUYJxg7MgYIABBFGDwyCAgBEEUYJxg7MgYIAhBFGDsyBggDEEUYOTIGCAQQRRg7MgYIBRAjGCcyBggGEEUYPDIGCAcQRRg80gEIMTM4NmowajSoAgGwAgHxBTSZVWSqQwqP8QU0mVVkqkMKjw&sourceid=chrome&ie=UTF-8"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full border border-border/60 bg-white hover:bg-secondary/60 text-sm font-semibold text-foreground transition-all shadow-sm hover:shadow-md group"
@@ -1547,12 +1544,12 @@ function ContactSection() {
 }
 
 // ─── Appointment Section ─────────────────────────────────────────────────────
-// Generate 30-min time slots for clinic hours: 10:00–13:00 and 18:00–21:00
+// Generate 30-min time slots for clinic hours: 08:00–13:00 and 16:00–18:00
 function generateTimeSlots(): string[] {
   const slots: string[] = [];
   const ranges = [
-    { start: 10, end: 13 },
-    { start: 18, end: 21 },
+    { start: 8, end: 13 },
+    { start: 16, end: 18 },
   ];
   for (const range of ranges) {
     for (let h = range.start; h < range.end; h++) {
@@ -1804,7 +1801,7 @@ function AppointmentSection() {
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <option value="">Select time</option>
-                            <optgroup label="Morning (10:00 AM – 1:00 PM)">
+                            <optgroup label="Morning (8:00 AM – 1:00 PM)">
                               {TIME_SLOTS.filter(
                                 (s) => Number.parseInt(s) < 13,
                               ).map((slot) => (
@@ -1813,9 +1810,9 @@ function AppointmentSection() {
                                 </option>
                               ))}
                             </optgroup>
-                            <optgroup label="Evening (6:00 PM – 9:00 PM)">
+                            <optgroup label="Evening (4:00 PM – 6:00 PM)">
                               {TIME_SLOTS.filter(
-                                (s) => Number.parseInt(s) >= 18,
+                                (s) => Number.parseInt(s) >= 16,
                               ).map((slot) => (
                                 <option key={slot} value={slot}>
                                   {formatTimeSlot(slot)}
@@ -2062,22 +2059,166 @@ function Footer() {
 }
 
 // ─── Gallery Section ─────────────────────────────────────────────────────────
-const clinicPhotos = [
-  "https://lh3.googleusercontent.com/p/AF1QipM0BtwSsqLn0O-fJX9cwutHmtaP51VIHP2ZxlNN=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipMmhmYdNAvL4OaMPpwbPjwEYwIxeh2g6u1SzVDt=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipM4GOt1wyQSnqgASQXFAOdOPuBfmnt-U5fs4O1t=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipOn63yrAnAAqLJGggGBthw2pltogN8vHG_OMC5a=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipM0KcSfgZuf60WSEoXjwXiKS1VBj2vLO4ff40Vx=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipMWov9np0fxRjih4SOwE_VheD7T0I3JvJ-93JJS=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipOoQypCcmDM77wSExYLjBVuGG3bdbM1JX4IvX9Y=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipO4c95Es8_N2740YTrfI6vTZF8z6Nbe7cPktDZW=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipN3v8I90C3lnsl9drcGkSGHNqbMr5BybNka1yoW=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipOSb_P0YaiJbQkyhOK17cV--FuWdROICLpSu0t5=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipNRLuSnCPjOu-rhkTtBXD8leSvHWQr5-PPMELSn=s300",
-  "https://lh3.googleusercontent.com/p/AF1QipN5_fE3-mhw8TQYCgHlx0HwDybXhSv0rX_A8U1H=s300",
+const clinicInteriorPhotos = [
+  {
+    src: "/assets/uploads/2025-09-13-1--2.jpg",
+    alt: "Fitness & exercise room inside clinic",
+  },
+  {
+    src: "/assets/uploads/2025-09-13-2--3.jpg",
+    alt: "Treatment room with therapy beds",
+  },
+  { src: "/assets/uploads/2025-09-13-4.jpg", alt: "Consultation room" },
+  { src: "/assets/uploads/2025-07-15-5.jpg", alt: "Clinic exterior building" },
 ];
 
+const clinicPromoPhotos = [
+  {
+    src: "/assets/uploads/2025-12-02-1.jpg",
+    alt: "Stay Strong as a Family - Kareem's Physiotherapy Clinic",
+  },
+  {
+    src: "/assets/uploads/2025-12-02-1--2.jpg",
+    alt: "Dr. Asif Kareem - Physiotherapy Steps to Recovery",
+  },
+  { src: "/assets/uploads/2025-07-14-11.webp", alt: "Our services" },
+  {
+    src: "/assets/uploads/2024-12-20-12.webp",
+    alt: "Conditions & treatments info",
+  },
+  {
+    src: "/assets/uploads/2025-07-15-7.webp",
+    alt: "Conditions treated poster",
+  },
+  { src: "/assets/uploads/2025-08-11-8.webp", alt: "Hijama camp poster" },
+  { src: "/assets/uploads/2025-08-16-6.webp", alt: "Clinic chargesheet" },
+  {
+    src: "/assets/uploads/2025-11-13-9.webp",
+    alt: "Dr. Kareem at CME Soldierathon event",
+  },
+];
+
+// Real photos sourced directly from Kareem's Physiotherapy Clinic Google Business profile
+// thumb: s200 for fast grid loading; full: high-res s1200 for lightbox
+const googleBusinessPhotos = [
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/ep6kCWXTCuEEqUTGXO3akgb3PoFYYgR7ETcaUtNczjfV5fScPxdJQrpsuXpPP0knjr4ZFrb_5uBbsUPmUA=s200",
+    full: "https://lh3.googleusercontent.com/ep6kCWXTCuEEqUTGXO3akgb3PoFYYgR7ETcaUtNczjfV5fScPxdJQrpsuXpPP0knjr4ZFrb_5uBbsUPmUA=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/F08E8ZkQxvwM-FwepVSJliuPuRWe5r2g1-CDiik_QYPHWlEl7kVFPTSimqGYo2dgYdblGGuJegr7Dng4tQ=s200",
+    full: "https://lh3.googleusercontent.com/F08E8ZkQxvwM-FwepVSJliuPuRWe5r2g1-CDiik_QYPHWlEl7kVFPTSimqGYo2dgYdblGGuJegr7Dng4tQ=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/A5W13dhGUTDod94XoXdNbEAzAMdzACtLcKgKGmWGfawp_LqYdddb_8sxY6QwgHpvZ3tI19KeP6eYxWul7g=s200",
+    full: "https://lh3.googleusercontent.com/A5W13dhGUTDod94XoXdNbEAzAMdzACtLcKgKGmWGfawp_LqYdddb_8sxY6QwgHpvZ3tI19KeP6eYxWul7g=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/gHy8mXHL6HS2OSXIGkZd75hMzjnauINGRfFBUntpSgRps2NE2GZt2Mkrw8241oSfgYtvrTclBH-LEE9uyw=s200",
+    full: "https://lh3.googleusercontent.com/gHy8mXHL6HS2OSXIGkZd75hMzjnauINGRfFBUntpSgRps2NE2GZt2Mkrw8241oSfgYtvrTclBH-LEE9uyw=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/9wxZINQOu8Z1TnMTQb-N9xGhY2_1l-B1cYJxLvroVchdt7pKe4LNKilfEzCjy96dSuFGMBjaQUixY2ShyA=s200",
+    full: "https://lh3.googleusercontent.com/9wxZINQOu8Z1TnMTQb-N9xGhY2_1l-B1cYJxLvroVchdt7pKe4LNKilfEzCjy96dSuFGMBjaQUixY2ShyA=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/WqxG0HL8QYgDS5xkVsfQbHhs0DgkFsk5hIrX5evSyaMUGNatz9n6pQw-gApW40lwEcVoUKrWqKw9xZZpwQ=s200",
+    full: "https://lh3.googleusercontent.com/WqxG0HL8QYgDS5xkVsfQbHhs0DgkFsk5hIrX5evSyaMUGNatz9n6pQw-gApW40lwEcVoUKrWqKw9xZZpwQ=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/PkJdg9196AuKLHTDefl782MHkBpcfEvwnLHcLhg8noy629I6jev2JFj7U7SPUMiImc_HAb6bSRSFdNeuGA=s200",
+    full: "https://lh3.googleusercontent.com/PkJdg9196AuKLHTDefl782MHkBpcfEvwnLHcLhg8noy629I6jev2JFj7U7SPUMiImc_HAb6bSRSFdNeuGA=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/iYbM4yijuwR7gSugZJvK6JLu-uh_dxYuymOv4oCXpZUidVSJXTOePKja8MBO0nrD9HLuD49yXiaBcUnG1Q=s200",
+    full: "https://lh3.googleusercontent.com/iYbM4yijuwR7gSugZJvK6JLu-uh_dxYuymOv4oCXpZUidVSJXTOePKja8MBO0nrD9HLuD49yXiaBcUnG1Q=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/eCI9aBSTw1IMLFabR_BtQvE1CzOeS_X-fCHoGTsAfVTt3Zy3qdGDToYgnhrhkj2obEnszDpoCR4D5iFRaQ=s200",
+    full: "https://lh3.googleusercontent.com/eCI9aBSTw1IMLFabR_BtQvE1CzOeS_X-fCHoGTsAfVTt3Zy3qdGDToYgnhrhkj2obEnszDpoCR4D5iFRaQ=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/bSCGyLmmjgvqJ2tKAF0I9xMOQl7eKes0OkPcTB0JjvxmbDjyW6YV4M1DYizZimMVZ_GhyU4aYHL5jNWpSA=s200",
+    full: "https://lh3.googleusercontent.com/bSCGyLmmjgvqJ2tKAF0I9xMOQl7eKes0OkPcTB0JjvxmbDjyW6YV4M1DYizZimMVZ_GhyU4aYHL5jNWpSA=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/upZA_z05h0WTgyiNfkCNVtD3Dj-FnjUhNy3mthnZwA2n9TWcj9qtLjqHr0p0kSMdrB3hC2ePHNkEhQSrWA=s200",
+    full: "https://lh3.googleusercontent.com/upZA_z05h0WTgyiNfkCNVtD3Dj-FnjUhNy3mthnZwA2n9TWcj9qtLjqHr0p0kSMdrB3hC2ePHNkEhQSrWA=s1200",
+  },
+  {
+    thumb:
+      "https://lh3.googleusercontent.com/Hvau1zaHCl3lSVc-9CfmIUMTiXvrdM7tkSgEYDoQ259DdliwmRFnBjk5r2bI7qaKUPxlq4S4Xc1i01Tosg=s200",
+    full: "https://lh3.googleusercontent.com/Hvau1zaHCl3lSVc-9CfmIUMTiXvrdM7tkSgEYDoQ259DdliwmRFnBjk5r2bI7qaKUPxlq4S4Xc1i01Tosg=s1200",
+  },
+];
+
+const GoogleIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" aria-hidden="true">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+    />
+  </svg>
+);
+
+// Lazy-loading image with skeleton placeholder for fast perceived performance
+function LazyImage({
+  src,
+  alt,
+  className,
+  priority = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  priority?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && (
+        <div className="absolute inset-0 bg-muted animate-pulse rounded-xl" />
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"} ${className ?? ""}`}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
+
 function GallerySection() {
+  const [showMoreGoogle, setShowMoreGoogle] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
   return (
     <section id="gallery" className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2101,63 +2242,165 @@ function GallerySection() {
             </p>
           </motion.div>
 
-          {/* Photo grid */}
+          {/* ── Clinic Interior Photos ── */}
+          <motion.div variants={fadeUp} className="w-full">
+            <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
+              Our Clinic
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {clinicInteriorPhotos.map((photo, i) => (
+                <motion.div
+                  key={photo.src}
+                  variants={fadeUp}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => setLightboxSrc(photo.src)}
+                  className="aspect-[4/3] overflow-hidden rounded-xl border border-border/40 cursor-pointer shadow-sm hover:shadow-lg transition-shadow"
+                >
+                  <LazyImage
+                    src={photo.src}
+                    alt={photo.alt}
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    priority={i < 4}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* ── Promotional Materials ── */}
+          <motion.div variants={fadeUp} className="w-full">
+            <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
+              Promotional Materials
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {clinicPromoPhotos.map((photo) => (
+                <motion.div
+                  key={photo.src}
+                  variants={fadeUp}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => setLightboxSrc(photo.src)}
+                  className="aspect-[4/3] overflow-hidden rounded-xl border border-border/40 cursor-pointer shadow-sm hover:shadow-lg transition-shadow"
+                >
+                  <LazyImage
+                    src={photo.src}
+                    alt={photo.alt}
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* ── Show More Google Business Photos ── */}
           <motion.div
-            variants={staggerContainer}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 w-full"
+            variants={fadeUp}
+            className="w-full flex flex-col items-center gap-6"
           >
-            {clinicPhotos.map((src, index) => (
-              <motion.div
-                key={src}
-                variants={fadeUp}
-                className="aspect-square overflow-hidden rounded-xl border border-border/40"
+            <button
+              type="button"
+              onClick={() => setShowMoreGoogle((prev) => !prev)}
+              className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full border border-border/60 bg-white hover:bg-secondary/60 text-sm font-semibold text-foreground transition-all shadow-sm hover:shadow-md group"
+            >
+              <GoogleIcon />
+              <span>{showMoreGoogle ? "Show Less" : "Show More Photos"}</span>
+              <motion.span
+                animate={{ rotate: showMoreGoogle ? 90 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="inline-flex"
               >
-                <img
-                  src={src}
-                  alt={`Kareem's Physiotherapy Clinic — view ${index + 1}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </motion.div>
-            ))}
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </motion.span>
+            </button>
+
+            <AnimatePresence>
+              {showMoreGoogle && (
+                <motion.div
+                  key="google-photos"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="w-full overflow-hidden"
+                >
+                  <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
+                    More Clinic Photos
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {googleBusinessPhotos.map((photo, index) => (
+                      <motion.div
+                        key={photo.thumb}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.04 }}
+                        whileHover={{ scale: 1.02 }}
+                        onClick={() => setLightboxSrc(photo.full)}
+                        className="aspect-[4/3] overflow-hidden rounded-xl border border-border/40 cursor-pointer shadow-sm hover:shadow-lg transition-shadow"
+                      >
+                        <LazyImage
+                          src={photo.thumb}
+                          alt={`Kareem's Physiotherapy Clinic — photo ${index + 1}`}
+                          className="object-cover hover:scale-105 transition-transform duration-500"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           {/* View All Photos CTA */}
           <motion.div variants={fadeUp}>
             <a
-              href="https://www.google.com/maps/place/Kareem's+Physiotherapy+Clinic+(Relieve+Pain,+Restore+Life)/@18.6153875,73.7867344,17z/photos"
+              href="https://www.google.com/search?q=kareem%27s+physiotherapy+clinic%2C+relieve+pain+and+recover+faster&oq=k&gs_lcrp=EgZjaHJvbWUqCAgBEEUYJxg7MgYIABBFGDwyCAgBEEUYJxg7MgYIAhBFGDsyBggDEEUYOTIGCAQQRRg7MgYIBRAjGCcyBggGEEUYPDIGCAcQRRg80gEIMTM4NmowajSoAgGwAgHxBTSZVWSqQwqP8QU0mVVkqkMKjw&sourceid=chrome&ie=UTF-8"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full border border-border/60 bg-white hover:bg-secondary/60 text-sm font-semibold text-foreground transition-all shadow-sm hover:shadow-md group"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-5 h-5 flex-shrink-0"
-                aria-hidden="true"
-              >
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
+              <GoogleIcon />
               <span>View All Photos on Google</span>
               <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
             </a>
           </motion.div>
         </motion.div>
       </div>
+
+      {/* ── Lightbox ── */}
+      <AnimatePresence>
+        {lightboxSrc && (
+          <motion.div
+            key="lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={() => setLightboxSrc(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setLightboxSrc(null)}
+              className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label="Close lightbox"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <motion.img
+              key={lightboxSrc}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              src={lightboxSrc}
+              alt="Enlarged clinic gallery view"
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-4xl max-h-[90vh] w-full object-contain rounded-xl shadow-2xl"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
@@ -2298,24 +2541,16 @@ function IntroSplash({ onDone }: { onDone: () => void }) {
       transition={{ duration: 0.7, ease: "easeInOut" }}
     >
       {/* Radial glow behind logo */}
-      <motion.div
+      <div
         className="absolute w-80 h-80 rounded-full"
         style={{
           background:
             "radial-gradient(circle, oklch(0.55 0.18 195 / 0.25) 0%, transparent 70%)",
         }}
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1.4, opacity: 1 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
       />
 
       {/* Logo */}
-      <motion.div
-        className="relative z-10 flex flex-col items-center gap-6"
-        initial={{ opacity: 0, scale: 0.7, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
-      >
+      <div className="relative z-10 flex flex-col items-center gap-6">
         <img
           src="/assets/uploads/1762682118827-1--2.jpg"
           alt="Kareem's Physiotherapy Clinic"
@@ -2323,28 +2558,21 @@ function IntroSplash({ onDone }: { onDone: () => void }) {
         />
 
         {/* Clinic name */}
-        <motion.div
-          className="flex flex-col items-center gap-1"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.6, ease: "easeOut" }}
-        >
+        <div className="flex flex-col items-center gap-1">
           <p className="text-white font-display font-bold text-xl sm:text-2xl tracking-wide text-center">
             Kareem's Physiotherapy Clinic
           </p>
           <p className="text-white/60 text-sm tracking-widest uppercase">
             Relieve Pain · Restore Life
           </p>
-        </motion.div>
+        </div>
 
-        {/* Animated underline */}
-        <motion.div
+        {/* Static underline */}
+        <div
           className="h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: 200 }}
-          transition={{ delay: 0.9, duration: 0.8, ease: "easeOut" }}
+          style={{ width: 200 }}
         />
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
