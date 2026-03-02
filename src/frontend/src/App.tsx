@@ -45,6 +45,30 @@ function scrollTo(id: string) {
   }
 }
 
+// ─── Click sound helper ──────────────────────────────────────────────────────
+function playClickSound() {
+  try {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.12);
+    osc.onended = () => ctx.close();
+  } catch {
+    // Silently ignore if Web Audio API is unavailable
+  }
+}
+
 // ─── Fade-in animation variants ─────────────────────────────────────────────
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -99,13 +123,18 @@ function Navigation() {
           {/* Logo */}
           <button
             type="button"
-            onClick={() => scrollTo("home")}
+            onClick={() => {
+              playClickSound();
+              scrollTo("home");
+            }}
             className="flex items-center gap-2 group"
           >
             <img
-              src="/assets/uploads/1762682118827-1--2.jpg"
+              src="/assets/uploads/Logo-KC-1.jpg"
               alt="Kareem's Physiotherapy Clinic"
-              className="h-16 w-auto object-contain"
+              className="h-16 w-16 object-contain"
+              fetchPriority="high"
+              decoding="sync"
             />
           </button>
 
@@ -115,7 +144,10 @@ function Navigation() {
               <button
                 type="button"
                 key={link.id}
-                onClick={() => scrollTo(link.id)}
+                onClick={() => {
+                  playClickSound();
+                  scrollTo(link.id);
+                }}
                 className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-secondary"
               >
                 {link.label}
@@ -126,13 +158,17 @@ function Navigation() {
               href={youtubeUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => playClickSound()}
               className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-[#FF0000] hover:text-[#cc0000] transition-colors rounded-md hover:bg-red-50"
             >
               <YouTubeIcon className="w-4 h-4" />
               YouTube
             </a>
             <Button
-              onClick={() => scrollTo("appointment")}
+              onClick={() => {
+                playClickSound();
+                scrollTo("appointment");
+              }}
               className="ml-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
             >
               Request Appointment
@@ -171,6 +207,7 @@ function Navigation() {
                   type="button"
                   key={link.id}
                   onClick={() => {
+                    playClickSound();
                     scrollTo(link.id);
                     setMenuOpen(false);
                   }}
@@ -184,7 +221,10 @@ function Navigation() {
                 href={youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setMenuOpen(false)}
+                onClick={() => {
+                  playClickSound();
+                  setMenuOpen(false);
+                }}
                 className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#FF0000] hover:text-[#cc0000] hover:bg-red-50 rounded-md transition-colors"
               >
                 <YouTubeIcon className="w-4 h-4" />
@@ -192,6 +232,7 @@ function Navigation() {
               </a>
               <Button
                 onClick={() => {
+                  playClickSound();
                   scrollTo("appointment");
                   setMenuOpen(false);
                 }}
@@ -1948,9 +1989,11 @@ function Footer() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <img
-                src="/assets/uploads/1762682118827-1--2.jpg"
+                src="/assets/uploads/Logo-KC-1.jpg"
                 alt="Kareem's Physiotherapy Clinic"
-                className="h-14 w-auto object-contain"
+                className="h-14 w-14 object-contain"
+                loading="eager"
+                decoding="sync"
               />
             </div>
             <p className="text-white/60 text-sm leading-relaxed">
@@ -1975,7 +2018,10 @@ function Footer() {
               <button
                 type="button"
                 key={link.id}
-                onClick={() => scrollTo(link.id)}
+                onClick={() => {
+                  playClickSound();
+                  scrollTo(link.id);
+                }}
                 className="text-white/60 hover:text-white text-sm text-left transition-colors"
               >
                 {link.label}
@@ -2540,21 +2586,40 @@ function IntroSplash({ onDone }: { onDone: () => void }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.7, ease: "easeInOut" }}
     >
-      {/* Radial glow behind logo */}
+      {/* Outer pulsing glow ring */}
       <div
-        className="absolute w-80 h-80 rounded-full"
+        className="absolute w-[520px] h-[520px] rounded-full animate-pulse"
         style={{
           background:
-            "radial-gradient(circle, oklch(0.55 0.18 195 / 0.25) 0%, transparent 70%)",
+            "radial-gradient(circle, oklch(0.60 0.20 195 / 0.28) 0%, transparent 65%)",
+        }}
+      />
+      {/* Mid glow layer */}
+      <div
+        className="absolute w-[380px] h-[380px] rounded-full animate-pulse"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.65 0.22 190 / 0.40) 0%, transparent 62%)",
+          animationDelay: "0.4s",
+        }}
+      />
+      {/* Inner bright glow */}
+      <div
+        className="absolute w-72 h-72 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.78 0.24 185 / 0.65) 0%, transparent 58%)",
         }}
       />
 
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center gap-6">
         <img
-          src="/assets/uploads/1762682118827-1--2.jpg"
+          src="/assets/uploads/Logo-KC-1.jpg"
           alt="Kareem's Physiotherapy Clinic"
           className="w-52 h-52 object-contain drop-shadow-2xl"
+          fetchPriority="high"
+          decoding="sync"
         />
 
         {/* Clinic name */}
@@ -2577,9 +2642,40 @@ function IntroSplash({ onDone }: { onDone: () => void }) {
   );
 }
 
+// ─── Global click sound hook ─────────────────────────────────────────────────
+function useGlobalClickSound() {
+  useEffect(() => {
+    const INTERACTIVE = [
+      "button",
+      "a",
+      '[role="button"]',
+      '[role="tab"]',
+      '[role="menuitem"]',
+      '[role="option"]',
+      "summary",
+      "label",
+      "select",
+      "input[type=radio]",
+      "input[type=checkbox]",
+    ].join(",");
+
+    function handleClick(e: MouseEvent) {
+      const target = e.target as Element;
+      if (target?.closest(INTERACTIVE)) {
+        playClickSound();
+      }
+    }
+
+    document.addEventListener("click", handleClick, { capture: true });
+    return () =>
+      document.removeEventListener("click", handleClick, { capture: true });
+  }, []);
+}
+
 // ─── App Root ────────────────────────────────────────────────────────────────
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
+  useGlobalClickSound();
 
   return (
     <>

@@ -7,6 +7,8 @@ import Runtime "mo:core/Runtime";
 import Order "mo:core/Order";
 import Nat "mo:core/Nat";
 
+
+
 actor {
   // DATA STRUCTURES
   // Shared types for appointment requests
@@ -17,6 +19,8 @@ actor {
     email : Text;
     preferredDatetime : Text;
     reason : Text;
+    status : Text;
+    notes : Text;
     timestamp : Time.Time;
   };
 
@@ -42,6 +46,8 @@ actor {
       email;
       preferredDatetime;
       reason;
+      status = "pending";
+      notes = "";
       timestamp = Time.now();
     };
 
@@ -59,6 +65,29 @@ actor {
     switch (appointmentRequests.get(id)) {
       case (null) { Runtime.trap("No appointment request found with the given ID") };
       case (?request) { request };
+    };
+  };
+
+  public shared ({ caller }) func updateAppointmentStatus(id : Nat, status : Text, notes : Text) : async Bool {
+    switch (appointmentRequests.get(id)) {
+      case (null) { false };
+      case (?request) {
+        let updatedRequest : AppointmentRequest = {
+          request with status;
+          notes;
+        };
+        appointmentRequests.add(id, updatedRequest);
+        true;
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteAppointmentRequest(id : Nat) : async Bool {
+    if (appointmentRequests.containsKey(id)) {
+      appointmentRequests.remove(id);
+      true;
+    } else {
+      false;
     };
   };
 };

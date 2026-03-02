@@ -91,21 +91,39 @@ export class ExternalBlob {
 }
 export interface AppointmentRequest {
     id: bigint;
+    status: string;
     name: string;
     email: string;
     preferredDatetime: string;
+    notes: string;
     timestamp: Time;
     phone: string;
     reason: string;
 }
 export type Time = bigint;
 export interface backendInterface {
+    deleteAppointmentRequest(id: bigint): Promise<boolean>;
     getAllAppointmentRequests(): Promise<Array<AppointmentRequest>>;
     getAppointmentRequest(id: bigint): Promise<AppointmentRequest>;
     submitAppointmentRequest(name: string, phone: string, email: string, preferredDatetime: string, reason: string): Promise<bigint>;
+    updateAppointmentStatus(id: bigint, status: string, notes: string): Promise<boolean>;
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async deleteAppointmentRequest(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteAppointmentRequest(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteAppointmentRequest(arg0);
+            return result;
+        }
+    }
     async getAllAppointmentRequests(): Promise<Array<AppointmentRequest>> {
         if (this.processError) {
             try {
@@ -145,6 +163,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.submitAppointmentRequest(arg0, arg1, arg2, arg3, arg4);
+            return result;
+        }
+    }
+    async updateAppointmentStatus(arg0: bigint, arg1: string, arg2: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateAppointmentStatus(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateAppointmentStatus(arg0, arg1, arg2);
             return result;
         }
     }

@@ -210,4 +210,9 @@
   .card-accent-amber {
     border-top: 3px solid oklch(0.72 0.18 65);
   }
+
+  /* Admin dashboard background */
+  .admin-bg {
+    background-color: oklch(0.96 0.006 240);
+  }
 }

@@ -12,21 +12,25 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export interface AppointmentRequest {
   'id' : bigint,
+  'status' : string,
   'name' : string,
   'email' : string,
   'preferredDatetime' : string,
+  'notes' : string,
   'timestamp' : Time,
   'phone' : string,
   'reason' : string,
 }
 export type Time = bigint;
 export interface _SERVICE {
+  'deleteAppointmentRequest' : ActorMethod<[bigint], boolean>,
   'getAllAppointmentRequests' : ActorMethod<[], Array<AppointmentRequest>>,
   'getAppointmentRequest' : ActorMethod<[bigint], AppointmentRequest>,
   'submitAppointmentRequest' : ActorMethod<
     [string, string, string, string, string],
     bigint
   >,
+  'updateAppointmentStatus' : ActorMethod<[bigint, string, string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

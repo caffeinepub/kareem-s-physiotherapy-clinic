@@ -11,15 +11,18 @@ import { IDL } from '@icp-sdk/core/candid';
 export const Time = IDL.Int;
 export const AppointmentRequest = IDL.Record({
   'id' : IDL.Nat,
+  'status' : IDL.Text,
   'name' : IDL.Text,
   'email' : IDL.Text,
   'preferredDatetime' : IDL.Text,
+  'notes' : IDL.Text,
   'timestamp' : Time,
   'phone' : IDL.Text,
   'reason' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
+  'deleteAppointmentRequest' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAllAppointmentRequests' : IDL.Func(
       [],
       [IDL.Vec(AppointmentRequest)],
@@ -35,6 +38,11 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'updateAppointmentStatus' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text],
+      [IDL.Bool],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -43,15 +51,18 @@ export const idlFactory = ({ IDL }) => {
   const Time = IDL.Int;
   const AppointmentRequest = IDL.Record({
     'id' : IDL.Nat,
+    'status' : IDL.Text,
     'name' : IDL.Text,
     'email' : IDL.Text,
     'preferredDatetime' : IDL.Text,
+    'notes' : IDL.Text,
     'timestamp' : Time,
     'phone' : IDL.Text,
     'reason' : IDL.Text,
   });
   
   return IDL.Service({
+    'deleteAppointmentRequest' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAllAppointmentRequests' : IDL.Func(
         [],
         [IDL.Vec(AppointmentRequest)],
@@ -65,6 +76,11 @@ export const idlFactory = ({ IDL }) => {
     'submitAppointmentRequest' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Nat],
+        [],
+      ),
+    'updateAppointmentStatus' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text],
+        [IDL.Bool],
         [],
       ),
   });
