@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import AdminPage from "./AdminPage";
 import { useActor } from "./hooks/useActor";
 
 // ─── Smooth scroll helper ───────────────────────────────────────────────────
@@ -1615,10 +1616,16 @@ function formatTimeSlot(slot: string): string {
 
 function AppointmentSection() {
   const { actor } = useActor();
+  const actorRef = useRef(actor);
   const [success, setSuccess] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+
+  // Keep actorRef always pointing at the latest actor value
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
 
   const isSunday = (dateStr: string) => {
     if (!dateStr) return false;
@@ -1649,25 +1656,38 @@ function AppointmentSection() {
       reason: string;
       isSundayRequest?: boolean;
     }) => {
-      // Try to save to backend in background — never block the user flow
-      try {
-        if (actor) {
-          await actor
-            .submitAppointmentRequest(
+      // Save to backend — retry up to 5 times, reading the latest actor from
+      // actorRef so we aren't blocked by a stale closure captured at mutation
+      // creation time (actor may still be initialising when mutate() is called).
+      const MAX_ATTEMPTS = 5;
+      const RETRY_DELAY_MS = 800;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        const currentActor = actorRef.current;
+        if (currentActor) {
+          try {
+            await currentActor.submitAppointmentRequest(
               data.name,
               data.phone,
               "",
               data.preferredDatetime,
               data.reason,
-            )
-            .catch(() => {
-              // Silently ignore backend errors
-            });
+            );
+            // Successfully saved — exit loop
+            return data;
+          } catch {
+            // Actor exists but call failed — wait and retry
+          }
         }
-      } catch {
-        // Never surface backend errors to the user
+        // Either actor not ready yet or call failed — wait before next attempt
+        if (attempt < MAX_ATTEMPTS - 1) {
+          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+        }
       }
-      return data;
+
+      // All attempts exhausted — WhatsApp already received the data so treat
+      // as non-fatal (onError will still show success to the user).
+      throw new Error("Backend save failed after all retries");
     },
     onSuccess: () => {
       setSuccess(true);
@@ -1676,8 +1696,7 @@ function AppointmentSection() {
       setSelectedTime("");
     },
     onError: () => {
-      // Even if somehow an error occurs, treat it as success
-      // since WhatsApp already received the message
+      // Even if backend fails, treat as success since WhatsApp already received the data
       setSuccess(true);
       formRef.current?.reset();
       setSelectedDate("");
@@ -1701,12 +1720,7 @@ function AppointmentSection() {
     };
     // Open WhatsApp immediately as a direct user gesture (avoids popup blockers)
     sendToWhatsApp(submissionData);
-    // Always mark as success immediately — WhatsApp already has the data
-    setSuccess(true);
-    formRef.current?.reset();
-    setSelectedDate("");
-    setSelectedTime("");
-    // Also try to save to backend in background (fire-and-forget)
+    // Save to backend (mutation handles success/error state)
     mutation.mutate(submissionData);
   };
 
@@ -2673,9 +2687,36 @@ function useGlobalClickSound() {
 }
 
 // ─── App Root ────────────────────────────────────────────────────────────────
+function isAdminHash(hash: string) {
+  return (
+    hash === "#/admin" ||
+    hash.startsWith("#/admin?") ||
+    hash.startsWith("#/admin#")
+  );
+}
+
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
+  const [hash, setHash] = useState(() => window.location.hash);
   useGlobalClickSound();
+
+  useEffect(() => {
+    function onHashChange() {
+      setHash(window.location.hash);
+    }
+    window.addEventListener("hashchange", onHashChange);
+    // Also check on popstate
+    window.addEventListener("popstate", onHashChange);
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("popstate", onHashChange);
+    };
+  }, []);
+
+  // Show admin page when hash is #/admin — skip intro entirely
+  if (isAdminHash(hash)) {
+    return <AdminPage />;
+  }
 
   return (
     <>

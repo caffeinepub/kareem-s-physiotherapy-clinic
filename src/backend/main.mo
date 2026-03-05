@@ -1,17 +1,15 @@
 import Time "mo:core/Time";
-import Text "mo:core/Text";
-import Map "mo:core/Map";
 import Array "mo:core/Array";
+import Map "mo:core/Map";
 import Iter "mo:core/Iter";
-import Runtime "mo:core/Runtime";
 import Order "mo:core/Order";
 import Nat "mo:core/Nat";
+import Runtime "mo:core/Runtime";
+import Migration "migration";
 
-
-
+(with migration = Migration.run)
 actor {
   // DATA STRUCTURES
-  // Shared types for appointment requests
   type AppointmentRequest = {
     id : Nat;
     name : Text;
@@ -32,11 +30,9 @@ actor {
 
   // COMPONENT LOGIC
 
-  // State variables
-  var nextId = 1;
-
-  // Persistent appointment requests map
-  let appointmentRequests = Map.empty<Nat, AppointmentRequest>();
+  // Persistent state variables
+  stable var nextId = 1;
+  stable let appointmentRequests = Map.empty<Nat, AppointmentRequest>();
 
   public shared ({ caller }) func submitAppointmentRequest(name : Text, phone : Text, email : Text, preferredDatetime : Text, reason : Text) : async Nat {
     let request : AppointmentRequest = {

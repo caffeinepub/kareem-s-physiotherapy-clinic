@@ -1,26 +1,20 @@
 # Kareem's Physiotherapy Clinic
 
 ## Current State
-The website has: Home, About, Treatments (5 service cards with detail dialogs), Why Choose Us, Reviews, Contact, and Appointment sections. Navigation has 5 links: Home, About, Treatments, Reviews, Contact.
+The site has a working appointment request form that sends details to WhatsApp. An admin planner exists at `/#/admin` with PIN 1234. The backend stores appointments via `submitAppointmentRequest` but the state variables (`nextId` and `appointmentRequests`) are NOT stable, meaning all appointment data is lost on every redeployment. Additionally, the frontend form submits to WhatsApp first and fires backend save as a background task — but the actor may not be ready (null) at submission time, so the backend save silently fails.
 
 ## Requested Changes (Diff)
 
 ### Add
-- **"Physiotherapy" main section** on the homepage (new nav tab): A dedicated section explaining what physiotherapy is, types of physiotherapy offered (Manual Therapy, Exercise Therapy, Electrotherapy, Dry Needling, Postural Rehabilitation), each with a card containing an image and short description. Include a banner image at top.
-- **"Conditions Treated" main section** on the homepage (new nav tab): A dedicated section listing all conditions treated, grouped by body region (Spine & Back, Shoulder & Neck, Knee & Hip, Sports Injuries, Post-Surgical, Neurological & Other), each group with an icon, image, and list of specific conditions. Include a banner image at top.
-- Two new nav links: "Physiotherapy" and "Conditions Treated" added to Navigation (both desktop and mobile menus).
-- Footer quick links updated to include new tabs.
+- Stable backend state so appointments persist through upgrades/redeployments
 
 ### Modify
-- Navigation: Add "Physiotherapy" and "Conditions Treated" links between "Treatments" and "Reviews".
-- Footer quick links: Add "Physiotherapy" and "Conditions Treated".
+- Make `nextId` and `appointmentRequests` stable variables in Motoko backend
+- Fix the appointment form to properly await backend save (with retry logic if actor isn't ready yet), ensuring all submitted appointments appear in the admin planner
 
 ### Remove
-- Nothing removed.
+- Nothing
 
 ## Implementation Plan
-1. Add `ConditionsTreatedSection` component with banner image, grouped conditions cards (6 groups), each group showing an icon + condition list.
-2. Add `PhysiotherapySection` component with banner image, intro text, 5 physiotherapy type cards (each with image + description).
-3. Update `Navigation` navLinks array to include "Physiotherapy" (id: "physiotherapy") and "Conditions Treated" (id: "conditions").
-4. Update Footer quick links array similarly.
-5. Add both new sections to the `App` component render tree between TreatmentsSection and WhyChooseUsSection.
+1. Regenerate Motoko backend with `stable var nextId` and `stable let appointmentRequests`
+2. Frontend appointment form already has retry logic applied — no further changes needed
