@@ -1656,11 +1656,10 @@ function AppointmentSection() {
       reason: string;
       isSundayRequest?: boolean;
     }) => {
-      // Save to backend — retry up to 5 times, reading the latest actor from
-      // actorRef so we aren't blocked by a stale closure captured at mutation
-      // creation time (actor may still be initialising when mutate() is called).
-      const MAX_ATTEMPTS = 5;
-      const RETRY_DELAY_MS = 800;
+      // Save to backend — retry up to 8 times with increasing delays,
+      // reading the latest actor from actorRef each attempt.
+      const MAX_ATTEMPTS = 8;
+      const RETRY_DELAYS = [500, 800, 1000, 1200, 1500, 1800, 2000, 2000];
 
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         const currentActor = actorRef.current;
@@ -1673,7 +1672,7 @@ function AppointmentSection() {
               data.preferredDatetime,
               data.reason,
             );
-            // Successfully saved — exit loop
+            // Successfully saved — return data so onSuccess fires
             return data;
           } catch {
             // Actor exists but call failed — wait and retry
@@ -1681,26 +1680,24 @@ function AppointmentSection() {
         }
         // Either actor not ready yet or call failed — wait before next attempt
         if (attempt < MAX_ATTEMPTS - 1) {
-          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+          await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
         }
       }
 
-      // All attempts exhausted — WhatsApp already received the data so treat
-      // as non-fatal (onError will still show success to the user).
-      throw new Error("Backend save failed after all retries");
+      throw new Error(
+        "Could not save appointment to the system. Please try again.",
+      );
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Backend saved successfully — now open WhatsApp
+      sendToWhatsApp(data);
       setSuccess(true);
       formRef.current?.reset();
       setSelectedDate("");
       setSelectedTime("");
     },
     onError: () => {
-      // Even if backend fails, treat as success since WhatsApp already received the data
-      setSuccess(true);
-      formRef.current?.reset();
-      setSelectedDate("");
-      setSelectedTime("");
+      // Backend failed — do not set success, let user see the error and retry
     },
   });
 
@@ -1718,9 +1715,7 @@ function AppointmentSection() {
       reason: fd.get("reason") as string,
       isSundayRequest: isSunday(selectedDate),
     };
-    // Open WhatsApp immediately as a direct user gesture (avoids popup blockers)
-    sendToWhatsApp(submissionData);
-    // Save to backend (mutation handles success/error state)
+    // Save to backend first; WhatsApp opens only after successful save
     mutation.mutate(submissionData);
   };
 
@@ -1954,6 +1949,13 @@ function AppointmentSection() {
                         />
                       </div>
 
+                      {mutation.isError && (
+                        <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive text-center">
+                          Could not save your appointment. Please check your
+                          connection and try again.
+                        </div>
+                      )}
+
                       <button
                         type="submit"
                         disabled={mutation.isPending}
@@ -1962,7 +1964,7 @@ function AppointmentSection() {
                         {mutation.isPending ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Submitting...
+                            Saving appointment...
                           </>
                         ) : (
                           <>
@@ -2121,15 +2123,21 @@ function Footer() {
 // ─── Gallery Section ─────────────────────────────────────────────────────────
 const clinicInteriorPhotos = [
   {
-    src: "/assets/uploads/2025-09-13-1--2.jpg",
-    alt: "Fitness & exercise room inside clinic",
+    src: "/assets/uploads/2025-07-15-1-1.jpg",
+    alt: "Kareem's Physiotherapy Clinic exterior building",
   },
   {
-    src: "/assets/uploads/2025-09-13-2--3.jpg",
-    alt: "Treatment room with therapy beds",
+    src: "/assets/uploads/2025-09-13-1-2.jpg",
+    alt: "Consultation and treatment room inside clinic",
   },
-  { src: "/assets/uploads/2025-09-13-4.jpg", alt: "Consultation room" },
-  { src: "/assets/uploads/2025-07-15-5.jpg", alt: "Clinic exterior building" },
+  {
+    src: "/assets/uploads/2025-09-13-1-1-3.jpg",
+    alt: "Fitness and exercise rehabilitation room",
+  },
+  {
+    src: "/assets/uploads/2025-09-13-2-1-4.jpg",
+    alt: "Treatment room with physiotherapy beds and equipment",
+  },
 ];
 
 const clinicPromoPhotos = [
@@ -2138,7 +2146,7 @@ const clinicPromoPhotos = [
     alt: "Stay Strong as a Family - Kareem's Physiotherapy Clinic",
   },
   {
-    src: "/assets/uploads/2025-12-02-1--2.jpg",
+    src: "/assets/uploads/2025-12-02-1-2.webp",
     alt: "Dr. Asif Kareem - Physiotherapy Steps to Recovery",
   },
   { src: "/assets/uploads/2025-07-14-11.webp", alt: "Our services" },
@@ -2147,14 +2155,14 @@ const clinicPromoPhotos = [
     alt: "Conditions & treatments info",
   },
   {
-    src: "/assets/uploads/2025-07-15-7.webp",
-    alt: "Conditions treated poster",
+    src: "/assets/uploads/2025-07-15-1--1.webp",
+    alt: "Re-align, Re-gain, Re-live — Kareem's Physiotherapy Clinic",
   },
   { src: "/assets/uploads/2025-08-11-8.webp", alt: "Hijama camp poster" },
   { src: "/assets/uploads/2025-08-16-6.webp", alt: "Clinic chargesheet" },
   {
-    src: "/assets/uploads/2025-11-13-9.webp",
-    alt: "Dr. Kareem at CME Soldierathon event",
+    src: "/assets/uploads/Services-1.jpeg",
+    alt: "Kareem's Physiotherapy Clinic - Services poster",
   },
 ];
 
@@ -2250,11 +2258,13 @@ function LazyImage({
   alt,
   className,
   priority = false,
+  highRes = false,
 }: {
   src: string;
   alt: string;
   className?: string;
   priority?: boolean;
+  highRes?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
   return (
@@ -2269,6 +2279,14 @@ function LazyImage({
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={priority ? "high" : "auto"}
+        style={
+          highRes
+            ? {
+                imageRendering:
+                  "high-quality" as React.CSSProperties["imageRendering"],
+              }
+            : undefined
+        }
         onLoad={() => setLoaded(true)}
       />
     </div>
@@ -2307,20 +2325,21 @@ function GallerySection() {
             <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
               Our Clinic
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {clinicInteriorPhotos.map((photo, i) => (
                 <motion.div
                   key={photo.src}
                   variants={fadeUp}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.01 }}
                   onClick={() => setLightboxSrc(photo.src)}
-                  className="aspect-[4/3] overflow-hidden rounded-xl border border-border/40 cursor-pointer shadow-sm hover:shadow-lg transition-shadow"
+                  className="aspect-[4/3] overflow-hidden rounded-2xl border border-border/40 cursor-pointer shadow-md hover:shadow-xl transition-shadow"
                 >
                   <LazyImage
                     src={photo.src}
                     alt={photo.alt}
-                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    className="object-cover hover:scale-105 transition-transform duration-700"
                     priority={i < 4}
+                    highRes
                   />
                 </motion.div>
               ))}
@@ -2339,12 +2358,12 @@ function GallerySection() {
                   variants={fadeUp}
                   whileHover={{ scale: 1.02 }}
                   onClick={() => setLightboxSrc(photo.src)}
-                  className="aspect-[4/3] overflow-hidden rounded-xl border border-border/40 cursor-pointer shadow-sm hover:shadow-lg transition-shadow"
+                  className="aspect-[3/4] overflow-hidden rounded-xl border border-border/40 cursor-pointer shadow-sm hover:shadow-lg transition-shadow"
                 >
                   <LazyImage
                     src={photo.src}
                     alt={photo.alt}
-                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    className="object-contain bg-white hover:scale-105 transition-transform duration-500"
                   />
                 </motion.div>
               ))}

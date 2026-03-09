@@ -32,6 +32,41 @@ import { toast } from "sonner";
 import type { AppointmentRequest } from "./backend";
 import { useActor } from "./hooks/useActor";
 
+// ─── Time Slot Helpers ─────────────────────────────────────────────────────────
+
+function generateAdminTimeSlots(): string[] {
+  const slots: string[] = [];
+  const ranges = [
+    { start: 8, end: 13 },
+    { start: 16, end: 18 },
+  ];
+  for (const range of ranges) {
+    for (let h = range.start; h < range.end; h++) {
+      const hStr = h.toString().padStart(2, "0");
+      slots.push(`${hStr}:00`);
+      slots.push(`${hStr}:30`);
+    }
+  }
+  return slots;
+}
+
+const ADMIN_TIME_SLOTS = generateAdminTimeSlots();
+
+function formatAdminTimeSlot(slot: string): string {
+  const [hStr, mStr] = slot.split(":");
+  const h = Number.parseInt(hStr, 10);
+  const period = h < 12 ? "AM" : "PM";
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${mStr} ${period}`;
+}
+
+function openWhatsAppToPatient(phone: string, message: string) {
+  const clean = phone.replace(/\D/g, "");
+  const withCountry = clean.startsWith("91") ? clean : `91${clean}`;
+  const url = `https://wa.me/${withCountry}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 type FilterTab = "all" | "pending" | "confirmed" | "cancelled" | "rescheduled";
@@ -58,6 +93,17 @@ function getStatusColor(status: string) {
     default:
       return "bg-amber-100 text-amber-800 border-amber-200";
   }
+}
+
+function buildConfirmMessage(appt: AppointmentRequest): string {
+  return `Hello ${appt.name}, your appointment at Kareem's Physiotherapy Clinic has been *confirmed* for *${appt.preferredDatetime}*. We look forward to seeing you! For any queries, call us at 9922866669.`;
+}
+
+function buildRescheduleMessage(
+  appt: AppointmentRequest,
+  newDatetime: string,
+): string {
+  return `Hello ${appt.name}, your appointment at Kareem's Physiotherapy Clinic has been *rescheduled* to *${newDatetime}*. Please let us know if this works for you. For any queries, call us at 9922866669.`;
 }
 
 function buildWhatsAppMessage(
@@ -189,7 +235,8 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
   const [notes, setNotes] = useState(appt.notes || "");
   const [showNotes, setShowNotes] = useState(false);
   const [showReschedule, setShowReschedule] = useState(false);
-  const [newDatetime, setNewDatetime] = useState("");
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const updateMutation = useMutation({
@@ -219,7 +266,15 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
   const isPending = updateMutation.isPending || deleteMutation.isPending;
 
   function handleConfirm() {
-    updateMutation.mutate({ status: "confirmed", note: notes });
+    updateMutation.mutate(
+      { status: "confirmed", note: notes },
+      {
+        onSuccess: () => {
+          // Notify patient on WhatsApp
+          openWhatsAppToPatient(appt.phone, buildConfirmMessage(appt));
+        },
+      },
+    );
   }
 
   function handleCancel() {
@@ -227,10 +282,22 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
   }
 
   function handleReschedule() {
-    if (!newDatetime) return;
-    updateMutation.mutate({ status: "rescheduled", note: newDatetime });
+    if (!rescheduleDate || !rescheduleTime) return;
+    const formattedTime = formatAdminTimeSlot(rescheduleTime);
+    const newDatetime = `${rescheduleDate} at ${formattedTime}`;
+    const msg = buildRescheduleMessage(appt, newDatetime);
+    updateMutation.mutate(
+      { status: "rescheduled", note: newDatetime },
+      {
+        onSuccess: () => {
+          // Notify patient on WhatsApp with new date/time
+          openWhatsAppToPatient(appt.phone, msg);
+        },
+      },
+    );
     setShowReschedule(false);
-    setNewDatetime("");
+    setRescheduleDate("");
+    setRescheduleTime("");
   }
 
   function handleDelete() {
@@ -243,6 +310,7 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
   }
 
   const whatsAppUrl = `https://wa.me/91${appt.phone}?text=${encodeURIComponent(buildWhatsAppMessage(appt))}`;
+  const rescheduleReady = rescheduleDate && rescheduleTime;
 
   return (
     <motion.div
@@ -339,7 +407,7 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
             )}
           </AnimatePresence>
 
-          {/* Reschedule input */}
+          {/* Reschedule panel: date picker + time slot selector */}
           <AnimatePresence>
             {showReschedule && (
               <motion.div
@@ -348,29 +416,82 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden mb-3"
               >
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="New date & time (e.g. 15 Jan 2026, 10:00 AM)"
-                    value={newDatetime}
-                    onChange={(e) => setNewDatetime(e.target.value)}
-                    className="text-sm flex-1"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleReschedule}
-                    disabled={!newDatetime || isPending}
-                  >
-                    Set
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowReschedule(false)}
-                  >
-                    ✕
-                  </Button>
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 flex flex-col gap-3">
+                  <p className="text-xs font-semibold text-blue-800 flex items-center gap-1.5">
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Select new date &amp; time slot
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Date picker */}
+                    <Input
+                      type="date"
+                      value={rescheduleDate}
+                      onChange={(e) => setRescheduleDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="text-sm border-blue-200 focus:border-blue-400"
+                    />
+                    {/* Time slot dropdown */}
+                    <select
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                    >
+                      <option value="">Select time</option>
+                      <optgroup label="Morning (8:00 AM – 1:00 PM)">
+                        {ADMIN_TIME_SLOTS.filter(
+                          (s) => Number.parseInt(s) < 13,
+                        ).map((slot) => (
+                          <option key={slot} value={slot}>
+                            {formatAdminTimeSlot(slot)}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Evening (4:00 PM – 6:00 PM)">
+                        {ADMIN_TIME_SLOTS.filter(
+                          (s) => Number.parseInt(s) >= 16,
+                        ).map((slot) => (
+                          <option key={slot} value={slot}>
+                            {formatAdminTimeSlot(slot)}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                  </div>
+                  {rescheduleReady && (
+                    <p className="text-xs text-blue-700 font-medium">
+                      New slot:{" "}
+                      <span className="font-bold">
+                        {rescheduleDate} at{" "}
+                        {formatAdminTimeSlot(rescheduleTime)}
+                      </span>
+                      <span className="ml-1 text-blue-500">
+                        — WhatsApp will open to notify patient
+                      </span>
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleReschedule}
+                      disabled={!rescheduleReady || isPending}
+                      className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-4 text-xs gap-1.5 flex-1"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Confirm &amp; Notify Patient
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowReschedule(false);
+                        setRescheduleDate("");
+                        setRescheduleTime("");
+                      }}
+                      className="h-8 px-3 text-xs"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -383,9 +504,10 @@ function AppointmentCard({ appt }: { appt: AppointmentRequest }) {
               onClick={handleConfirm}
               disabled={isPending || appt.status === "confirmed"}
               className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3 text-xs gap-1.5"
+              title="Confirm appointment and notify patient on WhatsApp"
             >
               <CheckCircle className="w-3.5 h-3.5" />
-              Confirm
+              Confirm &amp; Notify
             </Button>
             <Button
               size="sm"

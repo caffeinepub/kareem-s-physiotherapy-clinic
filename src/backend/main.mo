@@ -5,9 +5,9 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   // DATA STRUCTURES
   type AppointmentRequest = {
